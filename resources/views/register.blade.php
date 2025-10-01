@@ -13,6 +13,9 @@
 </head>
 <body>
 <h1>Register user</h1>
+@if($message!=='')
+    <p>{{$message}}</p>
+@endif
 <form method="post">
     <label>Namn: <input type="text" name="name" placeholder="Enter your name"></label>
     <label>Email: <input type="email" name="email" placeholder="Enter your email"></label>
