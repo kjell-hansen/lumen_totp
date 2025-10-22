@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
 </head>
 <body>
 <h1>Register user</h1>
-@if($message!=='')
+@if(isset($message))
     <p>{{$message}}</p>
 @endif
 <form method="post">
