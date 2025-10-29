@@ -28,4 +28,11 @@ interface UserRepository {
      * @return void
      */
     function saveRefreshToken(string $user_id, string $refreshToken, ?DateTimeInterface $expiresAt):void;
+
+    /**
+     * Hämtar en användare baserat på refresh-token
+     * @param string $refreshtoken
+     * @return User|null
+     */
+    function getUserByRefreshToken(string $refreshtoken):?User;
 }

@@ -8,6 +8,10 @@ use Carbon\Carbon;
 use DateTimeInterface;
 
 class DbUserRepository implements Interfaces\UserRepository {
+    public function __construct() {
+        $this->deleteExpiredTokens();
+    }
+
     /**
      * @inheritDoc
      */
@@ -34,5 +38,26 @@ class DbUserRepository implements Interfaces\UserRepository {
             'token' => $refreshToken,
             'expires' => $expiresAt
         ]);
+    }
+
+    function getUserByRefreshToken(string $refreshtoken):?User {
+        $hash = hash('sha256', $refreshtoken);
+
+        $record = RefreshToken::where('token', $hash)
+                              ->where(function($q) {
+                                  $q->whereNull('expires_at')
+                                    ->orWhere('expires_at', '>', now());
+                              })
+                              ->first();
+
+        if (!$record) {
+            return null;
+        }
+
+        return User::find($record->user_id);
+    }
+
+    private function deleteExpiredTokens():void {
+        RefreshToken::where('expires', '<', now())->delete();
     }
 }

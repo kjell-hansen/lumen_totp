@@ -45,7 +45,7 @@ class AuthController extends Controller {
             'refresh_token',
             $refreshToken,
             60 * 24 * 30,  // 30 dagar
-            '/',
+            '/refresh',
             null,
             true,          // secure (använd https i produktion)
             true,          // HttpOnly
@@ -64,4 +64,51 @@ class AuthController extends Controller {
                 'name' => $user->namn,
             ]])->cookie($cookie);
     }
+
+    public function refresh(Request $request) {
+        // Läs refresh-token från cookie
+        $refreshToken = $request->cookie('refresh_token');
+
+        if (!$refreshToken) {
+            return response()->json(['error' => 'Missing refresh token'], 401);
+        }
+
+        // Kontrollera att token finns i databasen
+        $user = $this->userRepo->getUserByRefreshToken($refreshToken);
+        if (!$user) {
+            return response()->json(['error' => 'Invalid refresh token'], 401);
+        }
+
+        // Skapa nytt access-token
+        $accessToken = $this->jwtService->createAccessToken($user->id);
+
+        // generera nytt refresh-token för rotation
+        $newRefreshToken = $this->jwtService->createRefreshToken();
+        $this->userRepo->saveRefreshToken($user->id, $newRefreshToken);
+
+        // Skapa cookie för nya refresh-token
+        $cookie = cookie(
+            'refresh_token',
+            $newRefreshToken,
+            60 * 24 * 30, // 30 dagar
+            '/refresh',
+            null,
+            true,          // secure
+            true,          // HttpOnly
+            false,         // Raw
+            'Strict'       // SameSite
+        );
+
+        // Returnera JSON med access-token + cookie
+        return response()->json([
+            'access_token' => $accessToken,
+            'token_type' => 'bearer',
+            'expires_in' => 900, // 15 minuter
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->epost,
+                'name' => $user->namn,
+            ]])->cookie($cookie);
+    }
+
 }
