@@ -60,4 +60,10 @@ class DbUserRepository implements Interfaces\UserRepository {
     private function deleteExpiredTokens():void {
         RefreshToken::where('expires', '<', now())->delete();
     }
+
+    public function deleteRefreshToken(string $refreshtoken):void {
+        $hash = hash('sha256', $refreshtoken);
+
+        RefreshToken::where('token_hash', $hash)->delete();
+    }
 }

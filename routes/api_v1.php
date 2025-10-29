@@ -7,3 +7,4 @@ $router->post('/login', 'AuthController@login');
 
 // Refreshtoken hantering
 $router->get('/refresh', 'AuthController@refresh');
+$router->delete('/refresh', 'AuthController@logout');

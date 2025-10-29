@@ -35,4 +35,10 @@ interface UserRepository {
      * @return User|null
      */
     function getUserByRefreshToken(string $refreshtoken):?User;
+
+    /**
+     * Raderar ett refreshtoken så att användaren loggas ut
+     * @return void
+     */
+    public function deleteRefreshToken(string $refreshtoken):void;
 }
