@@ -18,8 +18,8 @@ class AuthController extends Controller {
      * Login via TOTP
      */
     public function login(Request $request) {
-       $email=filter_var($request->input('email'), FILTER_VALIDATE_EMAIL);
-       $code=filter_var($request->input('code'), FILTER_VALIDATE_INT);
+        $email = filter_var($request->input('email'), FILTER_VALIDATE_EMAIL);
+        $code = filter_var($request->input('code'), FILTER_VALIDATE_INT);
 
         // Hämta användare via e-post
         $user = $this->userRepo->getUserByEmail($email);
@@ -45,17 +45,23 @@ class AuthController extends Controller {
             'refresh_token',
             $refreshToken,
             60 * 24 * 30,  // 30 dagar
+            '/',
             null,
-            null,
-            true,      // secure (använd https i produktion)
-            true       // HttpOnly
+            true,          // secure (använd https i produktion)
+            true,          // HttpOnly
+            false,         // Raw
+            'Strict'       // SameSite
         );
 
         // Returnera JSON med access-token + cookie
         return response()->json([
             'access_token' => $accessToken,
             'token_type' => 'bearer',
-            'expires_in' => 900 // 15 minuter
-        ])->cookie($cookie);
+            'expires_in' => 900, // 15 minuter
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->epost,
+                'name' => $user->namn,
+            ]])->cookie($cookie);
     }
 }
